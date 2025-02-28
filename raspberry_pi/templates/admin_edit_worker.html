@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Worker{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-dark sidebar collapse">
+            <div class="position-sticky pt-3">
+                <div class="text-center mb-4">
+                    <i class="fas fa-user-shield fa-3x text-white mb-3"></i>
+                    <h5 class="text-white">{{ admin.name }}</h5>
+                    <p class="text-muted">Admin Panel</p>
+                </div>
+                
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="{{ url_for('admin_dashboard') }}">
+                            <i class="fas fa-tachometer-alt me-2"></i>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="{{ url_for('admin_register_worker') }}">
+                            <i class="fas fa-user-plus me-2"></i>
+                            Register Worker
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active text-white" href="{{ url_for('admin_workers') }}">
+                            <i class="fas fa-users me-2"></i>
+                            Manage Workers
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="{{ url_for('admin_attendance') }}">
+                            <i class="fas fa-clipboard-list me-2"></i>
+                            Attendance Logs
+                        </a>
+                    </li>
+                    <li class="nav-item mt-5">
+                        <a class="nav-link text-white" href="{{ url_for('logout') }}">
+                            <i class="fas fa-sign-out-alt me-2"></i>
+                            Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        
+        <!-- Main content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Edit Worker</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group me-2">
+                        <a href="{{ url_for('admin_workers') }}" class="btn btn-sm btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Workers
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title mb-4">Worker Information</h5>
+                            
+                            <form action="{{ url_for('admin_edit_worker', worker_id=worker_id) }}" method="post">
+                                <div class="mb-3">
+                                    <label for="name" class="form-label">Full Name</label>
+                                    <input type="text" class="form-control" id="name" name="name" value="{{ worker.name }}" required>
+                                </div>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="rfid_id" class="form-label">RFID ID</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" id="rfid_id" name="rfid_id" value="{{ worker.rfid_id }}" required>
+                                            <button type="button" class="btn btn-outline-primary" id="scanRfidBtn">
+                                                <i class="fas fa-id-card me-2"></i>Scan
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="fingerprint_id" class="form-label">Fingerprint ID</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" id="fingerprint_id" name="fingerprint_id" value="{{ worker.fingerprint_id }}" required>
+                                            <button type="button" class="btn btn-outline-primary" id="scanFingerprintBtn">
+                                                <i class="fas fa-fingerprint me-2"></i>Scan
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="gps_device_id" class="form-label">GPS Device ID</label>
+                                    <input type="text" class="form-control" id="gps_device_id" name="gps_device_id" value="{{ worker.gps_device_id }}" required>
+                                </div>
+                                
+                                <div class="mb-4 form-check">
+                                    <input type="checkbox" class="form-check-input" id="is_admin" name="is_admin" {% if worker.is_admin %}checked{% endif %}>
+                                    <label class="form-check-label" for="is_admin">Register as Admin</label>
+                                </div>
+                                
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save me-2"></i>Save Changes
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title">Worker Details</h5>
+                            <p><strong>Worker ID:</strong> {{ worker_id }}</p>
+                            <p><strong>Current Name:</strong> {{ worker.name }}</p>
+                            <p><strong>Current RFID ID:</strong> {{ worker.rfid_id }}</p>
+                            <p><strong>Current Fingerprint ID:</strong> {{ worker.fingerprint_id }}</p>
+                            <p><strong>Current GPS Device:</strong> {{ worker.gps_device_id }}</p>
+                            <p><strong>Role:</strong> {% if worker.is_admin %}Admin{% else %}Worker{% endif %}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Scanner Status</h5>
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="me-3">
+                                    <i class="fas fa-id-card fa-2x text-success"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">RFID Scanner</h6>
+                                    <small class="text-success">Ready</small>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <div class="me-3">
+                                    <i class="fas fa-fingerprint fa-2x text-success"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">Fingerprint Scanner</h6>
+                                    <small class="text-success">Ready</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- RFID Scan Modal -->
+<div class="modal fade" id="rfidScanModal" tabindex="-1" aria-labelledby="rfidScanModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="rfidScanModalLabel">Scan RFID Card</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <i class="fas fa-id-card fa-5x text-primary mb-4"></i>
+                <p>Please place the RFID card on the reader...</p>
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fingerprint Scan Modal -->
+<div class="modal fade" id="fingerprintScanModal" tabindex="-1" aria-labelledby="fingerprintScanModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="fingerprintScanModalLabel">Scan Fingerprint</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <i class="fas fa-fingerprint fa-5x text-primary mb-4"></i>
+                <p>Please place your finger on the scanner...</p>
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // RFID Scan Button
+    document.getElementById('scanRfidBtn').addEventListener('click', function() {
+        const rfidModal = new bootstrap.Modal(document.getElementById('rfidScanModal'));
+        rfidModal.show();
+        
+        // Simulate RFID scan (in a real implementation, this would communicate with the ESP32)
+        setTimeout(function() {
+            // Generate a random RFID ID for demonstration
+            const rfidId = Math.random().toString(16).substring(2, 10).toUpperCase();
+            document.getElementById('rfid_id').value = rfidId;
+            rfidModal.hide();
+        }, 3000);
+    });
+    
+    // Fingerprint Scan Button
+    document.getElementById('scanFingerprintBtn').addEventListener('click', function() {
+        const fingerprintModal = new bootstrap.Modal(document.getElementById('fingerprintScanModal'));
+        fingerprintModal.show();
+        
+        // Simulate fingerprint scan (in a real implementation, this would communicate with the ESP32)
+        setTimeout(function() {
+            // Generate a random fingerprint ID for demonstration
+            const fingerprintId = Math.floor(Math.random() * 100);
+            document.getElementById('fingerprint_id').value = fingerprintId;
+            fingerprintModal.hide();
+        }, 3000);
+    });
+</script>
+{% endblock %}

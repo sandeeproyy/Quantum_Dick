@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block title %}Attendance Logs{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-dark sidebar collapse">
+            <div class="position-sticky pt-3">
+                <div class="text-center mb-4">
+                    <i class="fas fa-user-shield fa-3x text-white mb-3"></i>
+                    <h5 class="text-white">{{ admin.name }}</h5>
+                    <p class="text-muted">Admin Panel</p>
+                </div>
+                
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="{{ url_for('admin_dashboard') }}">
+                            <i class="fas fa-tachometer-alt me-2"></i>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="{{ url_for('admin_register_worker') }}">
+                            <i class="fas fa-user-plus me-2"></i>
+                            Register Worker
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="{{ url_for('admin_workers') }}">
+                            <i class="fas fa-users me-2"></i>
+                            Manage Workers
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active text-white" href="{{ url_for('admin_attendance') }}">
+                            <i class="fas fa-clipboard-list me-2"></i>
+                            Attendance Logs
+                        </a>
+                    </li>
+                    <li class="nav-item mt-5">
+                        <a class="nav-link text-white" href="{{ url_for('logout') }}">
+                            <i class="fas fa-sign-out-alt me-2"></i>
+                            Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        
+        <!-- Main content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Attendance Logs</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <form action="{{ url_for('admin_export_attendance') }}" method="post">
+                        <input type="hidden" name="date" value="{{ filter_date }}">
+                        <button type="submit" class="btn btn-sm btn-outline-secondary">
+                            <i class="fas fa-download me-2"></i>Export CSV
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Filter options -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Filter Options</h5>
+                            <form action="{{ url_for('admin_attendance') }}" method="get">
+                                <div class="mb-3">
+                                    <label for="date" class="form-label">Date</label>
+                                    <input type="date" class="form-control" id="date" name="date" value="{{ filter_date }}">
+                                </div>
+                                <button type="submit" class="btn btn-primary">Apply Filter</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="card-title">Attendance Summary for {{ filter_date }}</h5>
+                                <div class="input-group" style="width: 300px;">
+                                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                    <input type="text" id="attendanceSearch" class="form-control" placeholder="Search workers...">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Attendance table -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Worker ID</th>
+                                    <th>Name</th>
+                                    <th>Clock In</th>
+                                    <th>Clock Out</th>
+                                    <th>Hours Worked</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for record in attendance %}
+                                <tr>
+                                    <td>{{ record.worker_id }}</td>
+                                    <td>{{ record.name }}</td>
+                                    <td>{{ record.clock_in }}</td>
+                                    <td>{{ record.clock_out }}</td>
+                                    <td>{{ record.hours_worked }}</td>
+                                    <td>
+                                        {% if record.clock_in and record.clock_out %}
+                                        <span class="badge bg-success">Completed</span>
+                                        {% elif record.clock_in %}
+                                        <span class="badge bg-warning">Working</span>
+                                        {% else %}
+                                        <span class="badge bg-danger">Absent</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                
+                                {% if not attendance %}
+                                <tr>
+                                    <td colspan="6" class="text-center">No attendance records found for this date</td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Search functionality
+    document.getElementById('attendanceSearch').addEventListener('keyup', function() {
+        const searchValue = this.value.toLowerCase();
+        const tableRows = document.querySelectorAll('tbody tr');
+        
+        tableRows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            if (text.includes(searchValue)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}

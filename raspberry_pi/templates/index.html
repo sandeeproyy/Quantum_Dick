@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Worker Attendance System - Login{% endblock %}
+
+{% block content %}
+<div class="container-fluid vh-100">
+    <div class="row h-100">
+        <div class="col-md-6 bg-primary text-white d-flex flex-column justify-content-center align-items-center">
+            <h1 class="display-4 mb-4">Worker Attendance System</h1>
+            <p class="lead">Track attendance and location with fingerprint and RFID authentication</p>
+            <div class="mt-5">
+                <i class="fas fa-fingerprint fa-5x me-4"></i>
+                <i class="fas fa-id-card fa-5x me-4"></i>
+                <i class="fas fa-map-marker-alt fa-5x"></i>
+            </div>
+        </div>
+        <div class="col-md-6 d-flex flex-column justify-content-center align-items-center">
+            <div class="card shadow-lg" style="width: 24rem;">
+                <div class="card-body p-5">
+                    <h2 class="card-title text-center mb-4">Login</h2>
+                    
+                    {% if error %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ error }}
+                    </div>
+                    {% endif %}
+                    
+                    <ul class="nav nav-tabs mb-4" id="loginTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="admin-tab" data-bs-toggle="tab" data-bs-target="#admin" type="button" role="tab" aria-controls="admin" aria-selected="true">Admin</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="worker-tab" data-bs-toggle="tab" data-bs-target="#worker" type="button" role="tab" aria-controls="worker" aria-selected="false">Worker</button>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content" id="loginTabsContent">
+                        <div class="tab-pane fade show active" id="admin" role="tabpanel" aria-labelledby="admin-tab">
+                            <form action="{{ url_for('login') }}" method="post">
+                                <div class="mb-3">
+                                    <label for="username" class="form-label">Username</label>
+                                    <input type="text" class="form-control" id="username" name="username" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="password" class="form-label">Password</label>
+                                    <input type="password" class="form-control" id="password" name="password" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">Login</button>
+                            </form>
+                        </div>
+                        <div class="tab-pane fade" id="worker" role="tabpanel" aria-labelledby="worker-tab">
+                            <div class="text-center mb-4">
+                                <p>Scan your RFID card or fingerprint to clock in/out</p>
+                            </div>
+                            
+                            <div class="d-flex justify-content-center mb-3">
+                                <button id="rfidBtn" class="btn btn-outline-primary me-3">
+                                    <i class="fas fa-id-card me-2"></i>RFID
+                                </button>
+                                <button id="fingerprintBtn" class="btn btn-outline-primary">
+                                    <i class="fas fa-fingerprint me-2"></i>Fingerprint
+                                </button>
+                            </div>
+                            
+                            <div id="scanForm" class="d-none">
+                                <form action="{{ url_for('worker_auth') }}" method="post">
+                                    <input type="hidden" id="authType" name="auth_type" value="">
+                                    <div class="mb-3">
+                                        <label for="authValue" class="form-label">Scan Value</label>
+                                        <input type="text" class="form-control" id="authValue" name="auth_value" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100">Verify</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('rfidBtn').addEventListener('click', function() {
+        document.getElementById('authType').value = 'rfid';
+        document.getElementById('scanForm').classList.remove('d-none');
+        document.getElementById('authValue').focus();
+    });
+    
+    document.getElementById('fingerprintBtn').addEventListener('click', function() {
+        document.getElementById('authType').value = 'fingerprint';
+        document.getElementById('scanForm').classList.remove('d-none');
+        document.getElementById('authValue').focus();
+    });
+</script>
+{% endblock %}
